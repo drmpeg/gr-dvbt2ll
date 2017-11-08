@@ -545,7 +545,7 @@
     </param>
     <param>
       <key>constellation</key>
-      <value>MOD_64QAM</value>
+      <value>MOD_256QAM</value>
     </param>
     <param>
       <key>affinity</key>
@@ -561,7 +561,7 @@
     </param>
     <param>
       <key>fecblocks</key>
-      <value>6</value>
+      <value>8</value>
     </param>
     <param>
       <key>framesize</key>
@@ -672,7 +672,7 @@
     </param>
     <param>
       <key>constellation</key>
-      <value>MOD_64QAM</value>
+      <value>MOD_256QAM</value>
     </param>
     <param>
       <key>affinity</key>
