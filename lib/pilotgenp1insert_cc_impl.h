@@ -84,7 +84,7 @@ namespace gr {
       void init_prbs(void);
       void init_pilots(int);
 
-      fft::fft_complex *ofdm_fft;
+      fft::fft_complex_rev ofdm_fft;
       int ofdm_fft_size;
 
       const static unsigned char pn_sequence_table[CHIPS / 8];
@@ -164,7 +164,7 @@ namespace gr {
       gr_complex p1_timeshft[1024];
       void init_p1_randomizer(void);
 
-      fft::fft_complex *p1_fft;
+      fft::fft_complex_rev p1_fft;
       int p1_fft_size;
 
       const static int p1_active_carriers[384];

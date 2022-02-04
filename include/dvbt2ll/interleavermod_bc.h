@@ -36,7 +36,7 @@ namespace gr {
     class DVBT2LL_API interleavermod_bc : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<interleavermod_bc> sptr;
+      typedef std::shared_ptr<interleavermod_bc> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of dvbt2ll::interleavermod_bc.

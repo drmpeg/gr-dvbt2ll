@@ -36,7 +36,7 @@ namespace gr {
     class DVBT2LL_API bbheaderbch_bb : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<bbheaderbch_bb> sptr;
+      typedef std::shared_ptr<bbheaderbch_bb> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of dvbt2ll::bbheaderbch_bb.

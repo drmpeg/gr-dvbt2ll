@@ -36,7 +36,7 @@ namespace gr {
     class DVBT2LL_API pilotgenp1insert_cc : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<pilotgenp1insert_cc> sptr;
+      typedef std::shared_ptr<pilotgenp1insert_cc> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of dvbt2ll::pilotgenp1insert_cc.

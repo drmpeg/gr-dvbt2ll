@@ -43,7 +43,11 @@ namespace gr {
     pilotgenp1insert_cc_impl::pilotgenp1insert_cc_impl(dvbt2_extended_carrier_t carriermode, dvbt2_fftsize_t fftsize, dvbt2_pilotpattern_t pilotpattern, dvbt2_guardinterval_t guardinterval, int numdatasyms, dvbt2_papr_t paprmode, dvbt2_version_t version, dvbt2_preamble_t preamble, dvbt2_misogroup_t misogroup, dvbt2_equalization_t equalization, dvbt2_bandwidth_t bandwidth, int vlength)
       : gr::block("pilotgenp1insert_cc",
               gr::io_signature::make(1, 1, sizeof(gr_complex)),
-              gr::io_signature::make(1, 1, sizeof(gr_complex)))
+              gr::io_signature::make(1, 1, sizeof(gr_complex))),
+        ofdm_fft(vlength, 1),
+        ofdm_fft_size(vlength),
+        p1_fft(1024, 1),
+        p1_fft_size(1024)
     {
       int step, ki;
       double x, sinc, sincrms = 0.0;
@@ -1148,17 +1152,15 @@ namespace gr {
       for (int i = 0; i < 384; i++) {
         dbpsk_modulation_sequence[i] = dbpsk_modulation_sequence[i + 1] * p1_randomize[i];
       }
-      memset(&p1_freq[0], 0, sizeof(gr_complex) * 1024);
+      std::fill_n(&p1_freq[0], 1024, 0);
       for (int i = 0; i < 384; i++) {
         p1_freq[p1_active_carriers[i] + 86] = float(dbpsk_modulation_sequence[i]);
       }
-      p1_fft_size = 1024;
-      p1_fft = new fft::fft_complex(p1_fft_size, false, 1);
-      gr_complex *dst = p1_fft->get_inbuf();
+      gr_complex *dst = p1_fft.get_inbuf();
       memcpy(&dst[p1_fft_size / 2], &in[0], sizeof(gr_complex) * p1_fft_size / 2);
       memcpy(&dst[0], &in[p1_fft_size / 2], sizeof(gr_complex) * p1_fft_size / 2);
-      p1_fft->execute();
-      memcpy(out, p1_fft->get_outbuf(), sizeof(gr_complex) * p1_fft_size);
+      p1_fft.execute();
+      memcpy(out, p1_fft.get_outbuf(), sizeof(gr_complex) * p1_fft_size);
       for (int i = 0; i < 1024; i++) {
         p1_time[i] /= std::sqrt(384.0);
       }
@@ -1168,11 +1170,11 @@ namespace gr {
       p1_freqshft[0] = p1_freq[1023];
       in = (const gr_complex *) p1_freqshft;
       out = (gr_complex *) p1_timeshft;
-      dst = p1_fft->get_inbuf();
+      dst = p1_fft.get_inbuf();
       memcpy(&dst[p1_fft_size / 2], &in[0], sizeof(gr_complex) * p1_fft_size / 2);
       memcpy(&dst[0], &in[p1_fft_size / 2], sizeof(gr_complex) * p1_fft_size / 2);
-      p1_fft->execute();
-      memcpy(out, p1_fft->get_outbuf(), sizeof(gr_complex) * p1_fft_size);
+      p1_fft.execute();
+      memcpy(out, p1_fft.get_outbuf(), sizeof(gr_complex) * p1_fft_size);
       for (int i = 0; i < 1024; i++) {
         p1_timeshft[i] /= std::sqrt(384.0);
       }
@@ -1218,12 +1220,6 @@ namespace gr {
         inverse_sinc[i] *= sincrms;
       }
       equalization_enable = equalization;
-      ofdm_fft_size = vlength;
-      ofdm_fft = new (std::nothrow) fft::fft_complex(ofdm_fft_size, false, 1);
-      if (ofdm_fft == NULL) {
-        GR_LOG_FATAL(d_logger, "Pilot Generator and IFFT, cannot allocate memory for ofdm_fft.");
-        throw std::bad_alloc();
-      }
       num_symbols = numdatasyms + N_P2;
       set_output_multiple((num_symbols * (ofdm_fft_size + guard_interval)) + 2048);
     }
@@ -1233,7 +1229,6 @@ namespace gr {
      */
     pilotgenp1insert_cc_impl::~pilotgenp1insert_cc_impl()
     {
-      delete ofdm_fft;
     }
 
     void
@@ -2887,11 +2882,11 @@ namespace gr {
           if (equalization_enable == EQUALIZATION_ON) {
             volk_32fc_x2_multiply_32fc(fft_out, fft_out, inverse_sinc, ofdm_fft_size);
           }
-          dst = ofdm_fft->get_inbuf();
+          dst = ofdm_fft.get_inbuf();
           memcpy(&dst[ofdm_fft_size / 2], &fft_out[0], sizeof(gr_complex) * ofdm_fft_size / 2);
           memcpy(&dst[0], &fft_out[ofdm_fft_size / 2], sizeof(gr_complex) * ofdm_fft_size / 2);
-          ofdm_fft->execute();
-          volk_32fc_s32fc_multiply_32fc(fft_out, ofdm_fft->get_outbuf(), normalization, ofdm_fft_size);
+          ofdm_fft.execute();
+          volk_32fc_s32fc_multiply_32fc(fft_out, ofdm_fft.get_outbuf(), normalization, ofdm_fft_size);
           memcpy((out + guard_interval), fft_out, ofdm_fft_size * sizeof(gr_complex));
           memcpy(out, (fft_out + ofdm_fft_size - guard_interval), guard_interval * sizeof(gr_complex));
           out += ofdm_fft_size + guard_interval;

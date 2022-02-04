@@ -36,7 +36,7 @@ namespace gr {
     class DVBT2LL_API framemapperfint_cc : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<framemapperfint_cc> sptr;
+      typedef std::shared_ptr<framemapperfint_cc> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of dvbt2ll::framemapperfint_cc.

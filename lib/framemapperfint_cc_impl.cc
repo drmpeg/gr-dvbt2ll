@@ -1914,7 +1914,7 @@ namespace gr {
     {
       int sr = 0x4A80;
       int num = mapped_items - stream_items - 1840 - (N_post / eta_mod) - (N_FC - C_FC);
-      memset(&dummy_randomize[0], 0, sizeof(gr_complex) * num);
+      std::fill_n(&dummy_randomize[0], num, 0);
       for (int i = 0; i < num; i++) {
         int b = ((sr) ^ (sr >> 1)) & 1;
         dummy_randomize[i] = (b ? -1.0 : 1.0);
